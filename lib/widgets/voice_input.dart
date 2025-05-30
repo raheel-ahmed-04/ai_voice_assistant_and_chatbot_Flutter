@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:lottie/lottie.dart';
 
 class VoiceInput extends StatefulWidget {
   final Function(String) onResult;
@@ -21,6 +23,12 @@ class _VoiceInputState extends State<VoiceInput> {
   }
 
   void _listen() async {
+    var status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      print('Microphone permission denied');
+      return;
+    }
+
     if (!_isListening) {
       bool available = await _speech.initialize();
       if (available) {
@@ -42,12 +50,24 @@ class _VoiceInputState extends State<VoiceInput> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
-      onPressed: _listen,
-      color: Colors.blue,
-      tooltip: _isListening ? 'Stop Listening' : 'Start Listening',
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+          onPressed: _listen,
+          color: Colors.blue,
+          tooltip: _isListening ? 'Stop Listening' : 'Start Listening',
+        ),
+        if (_isListening)
+          SizedBox(
+            width: 80,
+            height: 70,
+            child: Lottie.asset(
+              'assets/voice-wave.json',
+              repeat: true,
+            ),
+          ),
+      ],
     );
   }
 }
- 

@@ -13,7 +13,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Message> _messages = [];
   final TextEditingController _controller = TextEditingController();
   bool _isTyping = false;
-
+  
   void _sendMessage(String text) async {
     if (text.trim().isEmpty) return;
     setState(() {
@@ -27,6 +27,15 @@ class _ChatScreenState extends State<ChatScreen> {
       _messages.add(Message(text: aiResponse, fromUser: false));
       _isTyping = false;
     });
+  }
+
+
+  void _handleVoiceResult(String result) {
+    setState(() {
+      _controller.text = result;
+    });
+    // Optionally: Automatically send message
+    // _sendMessage(result);
   }
 
   void _clearMessages() {
@@ -75,7 +84,6 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                VoiceInput(onResult: _sendMessage),
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -89,6 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 SizedBox(width: 8),
+                VoiceInput(onResult: _handleVoiceResult),
                 ElevatedButton(
                   onPressed: () => _sendMessage(_controller.text),
                   child: Text('Send'),
