@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/speech_service.dart';
 
 class MessageBubble extends StatelessWidget {
   final String text;
@@ -31,10 +32,9 @@ class MessageBubble extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.volume_up),
-              onPressed: () {
-                // Implement text-to-speech functionality here; for now, just print the text.
-                print("Speaking: $text");
-              },
+              onPressed: () async {
+                  await SpeechService.speak(text); // speak the provided `text`
+      },
             ),
           ],
         ),
