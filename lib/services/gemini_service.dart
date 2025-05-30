@@ -1,10 +1,32 @@
-// services/gemini_service.dart
-import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class GeminiService {
+  static const String apiKey = "AIzaSyDlR5kE0_7lwmE1nWfj9jIeWWysloPIw60";
+  static const String _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+
   static Future<String> getAIResponse(String prompt) async {
-    // TODO: Replace with actual Gemini API call
-    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
-    return "Here's what I think about: \"$prompt\" 🤖";
+    final response = await http.post(
+      Uri.parse(_apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "contents": [
+          {
+            "parts": [
+              {"text": "Give concise answer to my question: $prompt"}
+            ]
+          }
+        ]
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      return decoded["candidates"][0]["content"]["parts"][0]["text"];
+    } else {
+      throw Exception("Failed to get AI response: ${response.statusCode}");
+    }
   }
 }
