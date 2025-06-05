@@ -30,9 +30,23 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // Light theme background
       body: Center(
-        child: Lottie.asset('assets/ai_animation.json'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset('assets/ai-animation.json', width: 200, height: 200),
+            SizedBox(height: 20),
+            Text(
+              'AI Voice Assistant & Chatbot',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
