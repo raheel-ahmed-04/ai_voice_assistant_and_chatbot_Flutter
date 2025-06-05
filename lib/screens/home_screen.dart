@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'chat_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -17,6 +19,20 @@ class HomeScreen extends StatelessWidget {
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.black87),
+            tooltip: 'Logout',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -26,7 +42,8 @@ class HomeScreen extends StatelessWidget {
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -49,10 +66,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 10),
                     Text(
                       'Made by Raheel Ahmed (FA22-BSE-077)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -79,16 +93,13 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               icon: Icon(Icons.chat_bubble_outline),
-              label: Text(
-                'Start Chat',
-                style: TextStyle(fontSize: 18),
-              ),
+              label: Text('Start Chat', style: TextStyle(fontSize: 18)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF1BB878),
-                padding:
-                    EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25)),
+                  borderRadius: BorderRadius.circular(25),
+                ),
               ),
             ),
           ],

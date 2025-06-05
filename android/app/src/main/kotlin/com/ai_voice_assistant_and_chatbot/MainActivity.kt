@@ -1,4 +1,4 @@
-package com.example.ai_voice_assistant_and_chatbot
+package com.ai_voice_assistant_and_chatbot
 
 import io.flutter.embedding.android.FlutterActivity
 
