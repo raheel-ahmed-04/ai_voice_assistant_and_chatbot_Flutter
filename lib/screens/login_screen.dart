@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
+import 'package:lottie/lottie.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -83,7 +84,13 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Lottie.asset(
+              'assets/chatting-animation.json',
+              width: 250,
+              height: 250,
+            ),
             TextField(
               controller: emailController,
               decoration: InputDecoration(labelText: 'Email'),

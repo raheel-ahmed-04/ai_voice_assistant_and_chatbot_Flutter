@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('AI Assistant & Chatbot'),
+        title: Text('LexiChat'),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -48,18 +48,19 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    Lottie.asset(
-                      'assets/ai-animation.json',
-                      width: 250,
-                      height: 250,
-                    ),
+                    // Lottie.asset(
+                    //   'assets/ai-animation.json',
+                    //   width: 250,
+                    //   height: 250,
+                    // ),
+                    Image.asset('assets/lexichat.png', width: 250, height: 250),
                     SizedBox(height: 16),
                     Text(
-                      '"AI Voice Assistant & Chatbot"',
+                      '"Your Personal AI Voice Assistant & Chatbot"',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: const Color.fromARGB(221, 88, 88, 88),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -92,10 +93,10 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              icon: Icon(Icons.chat_bubble_outline),
-              label: Text('Start Chat', style: TextStyle(fontSize: 18)),
+              icon: Icon(Icons.chat_bubble_outline, color:Colors.white),
+              label: Text('Start Chat', style: TextStyle(fontSize: 18, color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF1BB878),
+                backgroundColor: Color(0xFF1E88E5),
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),

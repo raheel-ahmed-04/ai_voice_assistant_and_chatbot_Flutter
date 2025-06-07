@@ -51,16 +51,18 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset('assets/ai-animation.json', width: 200, height: 200),
+            // Lottie.asset('assets/ai-animation.json', width: 200, height: 200),
+            // SizedBox(height: 20),
+            // Text(
+            //   'AI Voice Assistant & Chatbot',
+            //   style: TextStyle(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.black87,
+            //   ),
+            // ),
+            Image.asset('assets/lexichat.png', width: 200, height: 200),
             SizedBox(height: 20),
-            Text(
-              'AI Voice Assistant & Chatbot',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
           ],
         ),
       ),
