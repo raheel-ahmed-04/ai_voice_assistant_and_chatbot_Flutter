@@ -8,34 +8,36 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('LexiChat'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black87),
-        titleTextStyle: TextStyle(
-          color: Colors.black87,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.black87),
-            tooltip: 'Logout',
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-                (route) => false,
-              );
-            },
-          ),
-        ],
-      ),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(70),
+        child: AppBar(
+          backgroundColor: const Color(0xFF0A2342),
+          elevation: 0,
+          centerTitle: true,
+          title: Image.asset(
+            'assets/lexichat-horizontal.png',
+            height: 48,
+            fit: BoxFit.contain,
+          ),
+            actions: [
+            IconButton(
+              icon: Icon(Icons.logout, color: Colors.white),
+              tooltip: 'Logout',
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+            ),
+  
+          ],
+        ),
+      ),
+        body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           children: [
@@ -48,12 +50,12 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    // Lottie.asset(
-                    //   'assets/ai-animation.json',
-                    //   width: 250,
-                    //   height: 250,
-                    // ),
-                    Image.asset('assets/lexichat.png', width: 250, height: 250),
+                    Lottie.asset(
+                      'assets/ai-animation.json',
+                      width: 250,
+                      height: 250,
+                    ),
+                    // Image.asset('assets/lexichat.png', width: 250, height: 250),
                     SizedBox(height: 16),
                     Text(
                       '"Your Personal AI Voice Assistant & Chatbot"',
@@ -93,8 +95,11 @@ class HomeScreen extends StatelessWidget {
                   ),
                 );
               },
-              icon: Icon(Icons.chat_bubble_outline, color:Colors.white),
-              label: Text('Start Chat', style: TextStyle(fontSize: 18, color: Colors.white)),
+              icon: Icon(Icons.chat_bubble_outline, color: Colors.white),
+              label: Text(
+                'Start Chat',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF1E88E5),
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),

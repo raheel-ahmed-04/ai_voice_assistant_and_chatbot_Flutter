@@ -75,6 +75,8 @@ flutter:
     - assets/chatting-animation.json
     - assets/voice-wave.json
     - assets/lexichat.png
+    - assets/lexichat-white.png
+    - assets/lexichat-horizontal.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
