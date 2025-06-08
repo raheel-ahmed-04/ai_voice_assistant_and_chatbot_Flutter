@@ -4,6 +4,7 @@ import 'chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 import 'about_developer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -65,7 +66,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(Icons.info_outline, color: Colors.white),
+                leading: Icon(Icons.code, color: Colors.white),
               title: Text(
                 'About Developer',
                 style: TextStyle(color: Colors.white),
@@ -125,7 +126,6 @@ class HomeScreen extends StatelessWidget {
                       width: 250,
                       height: 250,
                     ),
-                    // Image.asset('assets/lexichat.png', width: 250, height: 250),
                     SizedBox(height: 16),
                     Text(
                       '"Your Personal AI Voice Assistant & Chatbot"',
@@ -167,7 +167,7 @@ class HomeScreen extends StatelessWidget {
               },
               icon: Icon(Icons.chat_bubble_outline, color: Colors.white),
               label: Text(
-                'Start Chat',
+                'Start New Chat',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
@@ -178,9 +178,175 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 32),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  Icon(Icons.history, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text(
+                    'Chat History',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0A2342),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 12),
+            _ChatHistoryList(userId: user?.uid),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ChatHistoryList extends StatelessWidget {
+  final String? userId;
+
+  const _ChatHistoryList({Key? key, this.userId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (userId == null) {
+      return Center(
+        child: Text('User not logged in', style: TextStyle(color: Colors.grey)),
+      );
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream:
+          FirebaseFirestore.instance
+              .collection('chats')
+              .doc(userId)
+              .collection('conversations')
+              .orderBy('lastUpdated', descending: true)
+              .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error loading chat history',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        }
+
+        final conversations = snapshot.data?.docs;
+
+        if (conversations == null || conversations.isEmpty) {
+          return Center(
+            child: Text(
+              'No chat history found',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: conversations.length,
+          separatorBuilder: (context, index) => Divider(),
+          itemBuilder: (context, index) {
+            final doc = conversations[index];
+            final lastMsg = doc['lastMessage'] ?? '';
+            final lastUpdated = (doc['lastUpdated'] as Timestamp?)?.toDate();
+            final title = (doc.data() as Map<String, dynamic>)['title'] ?? '';
+            // Skip empty conversations (no messages, no title, no lastMessage)
+            if ((lastMsg.isEmpty || lastMsg.trim().isEmpty) &&
+                (title.isEmpty || title.trim().isEmpty)) {
+              return SizedBox.shrink();
+            }
+            return ListTile(
+              leading: Icon(
+                Icons.chat_bubble_outline,
+                color: Color(0xFF1976D2),
+              ),
+              title: Text(
+                title.isNotEmpty
+                    ? title
+                    : (lastMsg.length > 40
+                        ? lastMsg.substring(0, 40) + '...'
+                        : lastMsg),
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle:
+                  lastUpdated != null
+                      ? Text(
+                        '${lastUpdated.toLocal()}'.split('.')[0],
+                        style: TextStyle(color: Colors.grey[700]),
+                      )
+                      : null,
+              trailing: IconButton(
+                icon: Icon(Icons.delete, color: Colors.redAccent),
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (ctx) => AlertDialog(
+                          title: Text('Delete Conversation'),
+                          content: Text(
+                            'Are you sure you want to delete this conversation and all its messages?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                  );
+                  if (confirm != true) return;
+                  // Delete all messages in the conversation
+                  final messagesRef = FirebaseFirestore.instance
+                      .collection('chats')
+                      .doc(userId)
+                      .collection('conversations')
+                      .doc(doc.id)
+                      .collection('messages');
+                  final messagesSnapshot = await messagesRef.get();
+                  final batch = FirebaseFirestore.instance.batch();
+                  for (var msg in messagesSnapshot.docs) {
+                    batch.delete(msg.reference);
+                  }
+                  batch.delete(
+                    FirebaseFirestore.instance
+                        .collection('chats')
+                        .doc(userId)
+                        .collection('conversations')
+                        .doc(doc.id),
+                  );
+                  await batch.commit();
+                },
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(conversationId: doc.id),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

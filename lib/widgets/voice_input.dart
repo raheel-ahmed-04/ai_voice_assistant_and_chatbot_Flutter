@@ -55,7 +55,7 @@ class _VoiceInputState extends State<VoiceInput> {
         IconButton(
           icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
           onPressed: _listen,
-          color: Colors.blue,
+          color: const Color(0xFF2196F3),
           tooltip: _isListening ? 'Stop Listening' : 'Start Listening',
         ),
         if (_isListening)
