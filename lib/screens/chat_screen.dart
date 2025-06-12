@@ -18,6 +18,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Message> _messages = [];
   final TextEditingController _controller = TextEditingController();
   bool _isTyping = false;
+  bool _isVoiceInputActive = false;
+  bool _isSending = false;
   User? user;
   String? _conversationId;
 
@@ -65,113 +67,128 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendMessage(String text) async {
-    if (text.trim().isEmpty || user == null) return;
-    // If this is the first message, create the conversation doc now
-    if (_conversationId == null) {
-      final docRef = await FirebaseFirestore.instance
-          .collection('chats')
-          .doc(user!.uid)
-          .collection('conversations')
-          .add({
-            'lastMessage': text,
-            'lastUpdated': FieldValue.serverTimestamp(),
-            'title': '', // Placeholder, will update after Gemini
-          });
-      setState(() {
-        _conversationId = docRef.id;
-      });
-    }
+    if (text.trim().isEmpty || user == null || _isSending) return;
+
     setState(() {
-      _messages.add(Message(text: text, fromUser: true));
-      _isTyping = true;
+      _isSending = true; // Disable send button
     });
-    _controller.clear();
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(user!.uid)
-        .collection('conversations')
-        .doc(_conversationId)
-        .collection('messages')
-        .add({
-          'text': text,
-          'fromUser': true,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(user!.uid)
-        .collection('conversations')
-        .doc(_conversationId)
-        .update({
-          'lastMessage': text,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        });
-    final aiResponse = await GeminiService.getAIResponse(text);
-    setState(() {
-      _messages.add(Message(text: aiResponse, fromUser: false));
-      _isTyping = false;
-    });
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(user!.uid)
-        .collection('conversations')
-        .doc(_conversationId)
-        .collection('messages')
-        .add({
-          'text': aiResponse,
-          'fromUser': false,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(user!.uid)
-        .collection('conversations')
-        .doc(_conversationId)
-        .update({
-          'lastMessage': aiResponse,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        });
-    // If this is the first user+AI message pair, generate a title
-    final convoDoc =
-        await FirebaseFirestore.instance
+
+    try {
+      // If this is the first message, create the conversation doc now
+      if (_conversationId == null) {
+        final docRef = await FirebaseFirestore.instance
             .collection('chats')
             .doc(user!.uid)
             .collection('conversations')
-            .doc(_conversationId)
-            .get();
-    if ((convoDoc.data()?['title'] ?? '').isEmpty) {
-      // Gather the first 6 messages for title context
-      final messagesSnapshot =
+            .add({
+              'lastMessage': text,
+              'lastUpdated': FieldValue.serverTimestamp(),
+              'title': '', // Placeholder, will update after Gemini
+            });
+        setState(() {
+          _conversationId = docRef.id;
+        });
+      }
+      setState(() {
+        _messages.add(Message(text: text, fromUser: true));
+        _isTyping = true;
+      });
+      _controller.clear();
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(user!.uid)
+          .collection('conversations')
+          .doc(_conversationId)
+          .collection('messages')
+          .add({
+            'text': text,
+            'fromUser': true,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(user!.uid)
+          .collection('conversations')
+          .doc(_conversationId)
+          .update({
+            'lastMessage': text,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+      final aiResponse = await GeminiService.getAIResponse(text);
+      setState(() {
+        _messages.add(Message(text: aiResponse, fromUser: false));
+        _isTyping = false;
+      });
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(user!.uid)
+          .collection('conversations')
+          .doc(_conversationId)
+          .collection('messages')
+          .add({
+            'text': aiResponse,
+            'fromUser': false,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(user!.uid)
+          .collection('conversations')
+          .doc(_conversationId)
+          .update({
+            'lastMessage': aiResponse,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          });
+      // If this is the first user+AI message pair, generate a title
+      final convoDoc =
           await FirebaseFirestore.instance
               .collection('chats')
               .doc(user!.uid)
               .collection('conversations')
               .doc(_conversationId)
-              .collection('messages')
-              .orderBy('timestamp')
-              .limit(6)
               .get();
-      final convoText = messagesSnapshot.docs.map((d) => d['text']).join(' ');
-      try {
-        final title = await GeminiService.getChatTitle(convoText);
-        await FirebaseFirestore.instance
-            .collection('chats')
-            .doc(user!.uid)
-            .collection('conversations')
-            .doc(_conversationId)
-            .update({'title': title.trim()});
-      } catch (_) {
-        // fallback: do nothing
+      if ((convoDoc.data()?['title'] ?? '').isEmpty) {
+        // Gather the first 6 messages for title context
+        final messagesSnapshot =
+            await FirebaseFirestore.instance
+                .collection('chats')
+                .doc(user!.uid)
+                .collection('conversations')
+                .doc(_conversationId)
+                .collection('messages')
+                .orderBy('timestamp')
+                .limit(6)
+                .get();
+        final convoText = messagesSnapshot.docs.map((d) => d['text']).join(' ');
+        try {
+          final title = await GeminiService.getChatTitle(convoText);
+          await FirebaseFirestore.instance
+              .collection('chats')
+              .doc(user!.uid)
+              .collection('conversations')
+              .doc(_conversationId)
+              .update({'title': title.trim()});
+        } catch (_) {
+          // fallback: do nothing
+        }
       }
+    } catch (e) {
+      // Handle any errors here
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send message. Please try again.')),
+      );
+    } finally {
+      setState(() {
+        _isSending = false; // Re-enable send button
+      });
     }
   }
 
   void _handleVoiceResult(String result) {
     setState(() {
       _controller.text = result;
+      _isVoiceInputActive = false; // Reset voice input state
     });
-    // Optionally: Automatically send message
-    // _sendMessage(result);
   }
 
   @override
@@ -223,9 +240,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    enabled: !_isVoiceInputActive, // Disable during voice input
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Ask me anything...',
+                      hintText:
+                          _isVoiceInputActive
+                              ? 'Listening...'
+                              : 'Ask me anything...',
                       hintStyle: TextStyle(color: Colors.blue[100]),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -237,9 +258,21 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 SizedBox(width: 8),
-                VoiceInput(onResult: _handleVoiceResult),
+                VoiceInput(
+                  onResult: _handleVoiceResult,
+                  onListeningStateChanged: (isListening) {
+                    setState(() {
+                      _isVoiceInputActive = isListening;
+                    });
+                  },
+                ),
                 ElevatedButton(
-                  onPressed: () => _sendMessage(_controller.text),
+                  onPressed:
+                      (_isSending ||
+                              _isVoiceInputActive)
+                              //  || _controller.text.trim().isEmpty)
+                          ? null
+                          : () => _sendMessage(_controller.text),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF1976D2),
                     shape: RoundedRectangleBorder(

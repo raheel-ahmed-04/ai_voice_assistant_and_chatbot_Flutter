@@ -5,8 +5,9 @@ import 'package:lottie/lottie.dart';
 
 class VoiceInput extends StatefulWidget {
   final Function(String) onResult;
+  final Function(bool)? onListeningStateChanged;
 
-  const VoiceInput({required this.onResult});
+  const VoiceInput({required this.onResult, this.onListeningStateChanged});
 
   @override
   _VoiceInputState createState() => _VoiceInputState();
@@ -22,29 +23,55 @@ class _VoiceInputState extends State<VoiceInput> {
     _speech = stt.SpeechToText();
   }
 
-  void _listen() async {
-    var status = await Permission.microphone.request();
-    if (status != PermissionStatus.granted) {
-      print('Microphone permission denied');
+  Future<void> _listen() async {
+    if (_isListening) {
+      await _speech.stop();
+      setState(() {
+        _isListening = false;
+      });
+      widget.onListeningStateChanged?.call(false);
       return;
     }
 
-    if (!_isListening) {
-      bool available = await _speech.initialize();
-      if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) {
-            if (val.finalResult) {
-              widget.onResult(val.recognizedWords);
-              setState(() => _isListening = false);
-            }
-          },
-        );
-      }
-    } else {
-      _speech.stop();
-      setState(() => _isListening = false);
+    final micPermission = await Permission.microphone.request();
+    if (micPermission != PermissionStatus.granted) {
+      return;
+    }
+
+    bool available = await _speech.initialize(
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          setState(() {
+            _isListening = false;
+          });
+          widget.onListeningStateChanged?.call(false);
+        }
+      },
+      onError: (error) {
+        setState(() {
+          _isListening = false;
+        });
+        widget.onListeningStateChanged?.call(false);
+      },
+    );
+
+    if (available) {
+      setState(() {
+        _isListening = true;
+      });
+      widget.onListeningStateChanged?.call(true);
+
+      await _speech.listen(
+        onResult: (result) {
+          if (result.finalResult) {
+            widget.onResult(result.recognizedWords);
+            setState(() {
+              _isListening = false;
+            });
+            widget.onListeningStateChanged?.call(false);
+          }
+        },
+      );
     }
   }
 
@@ -62,10 +89,7 @@ class _VoiceInputState extends State<VoiceInput> {
           SizedBox(
             width: 80,
             height: 70,
-            child: Lottie.asset(
-              'assets/voice-wave.json',
-              repeat: true,
-            ),
+            child: Lottie.asset('assets/voice-wave.json', repeat: true),
           ),
       ],
     );
