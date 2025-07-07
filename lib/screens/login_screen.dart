@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
-// import 'package:lottie/lottie.dart';
+import 'package:lottie/lottie.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -140,37 +140,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 18),
                 Container(
                   decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(18),
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: TextField(
-                  controller: passwordController,
-                  keyboardType: TextInputType.visiblePassword,
-                  obscureText: _isPasswordObscured,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.blue[100]),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
+                    controller: passwordController,
+                    keyboardType: TextInputType.visiblePassword,
+                    obscureText: _isPasswordObscured,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      hintStyle: TextStyle(color: Colors.blue[100]),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      prefixIcon: Icon(Icons.lock, color: Colors.blue[200]),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordObscured
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.blue[200],
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordObscured = !_isPasswordObscured;
+                          });
+                        },
+                      ),
                     ),
-                    prefixIcon: Icon(Icons.lock, color: Colors.blue[200]),
-                    suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordObscured
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                      color: Colors.blue[200],
-                    ),
-                    onPressed: () {
-                      setState(() {
-                      _isPasswordObscured = !_isPasswordObscured;
-                      });
-                    },
-                    ),
-                  ),
                   ),
                 ),
                 if (errorMessage != null) ...[
@@ -182,7 +182,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 SizedBox(height: 28),
                 isLoading
-                    ? CircularProgressIndicator(color: Colors.blueAccent)
+                    ? SizedBox(
+                      height: 120,
+                      child: Center(
+                        child: Lottie.asset(
+                          'assets/loader2.json',
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    )
                     : Column(
                       children: [
                         SizedBox(

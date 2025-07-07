@@ -75,6 +75,7 @@ flutter:
     - assets/ai-typing-indicator.json
     - assets/chatting-animation.json
     - assets/voice-wave.json
+    - assets/loader2.json
     - assets/lexichat.png
     - assets/lexichat-white.png
     - assets/lexichat-horizontal.png

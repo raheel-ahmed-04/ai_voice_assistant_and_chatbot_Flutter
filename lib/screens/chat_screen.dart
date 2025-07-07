@@ -22,6 +22,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isSending = false;
   User? user;
   String? _conversationId;
+  bool _isLoadingMessages = false;
 
   @override
   void initState() {
@@ -47,23 +48,32 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadMessages() async {
     if (user == null || _conversationId == null) return;
-    final snapshot =
-        await FirebaseFirestore.instance
-            .collection('chats')
-            .doc(user!.uid)
-            .collection('conversations')
-            .doc(_conversationId)
-            .collection('messages')
-            .orderBy('timestamp')
-            .get();
     setState(() {
-      _messages.clear();
-      _messages.addAll(
-        snapshot.docs.map(
-          (doc) => Message(text: doc['text'], fromUser: doc['fromUser']),
-        ),
-      );
+      _isLoadingMessages = true;
     });
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection('chats')
+              .doc(user!.uid)
+              .collection('conversations')
+              .doc(_conversationId)
+              .collection('messages')
+              .orderBy('timestamp')
+              .get();
+      setState(() {
+        _messages.clear();
+        _messages.addAll(
+          snapshot.docs.map(
+            (doc) => Message(text: doc['text'], fromUser: doc['fromUser']),
+          ),
+        );
+      });
+    } finally {
+      setState(() {
+        _isLoadingMessages = false;
+      });
+    }
   }
 
   Future<void> _sendMessage(String text) async {
@@ -209,83 +219,98 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return MessageBubble(
-                  text: message.text,
-                  fromUser: message.fromUser,
-                );
-              },
-            ),
-          ),
-          if (_isTyping)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Lottie.asset(
-                'assets/ai-typing-indicator.json',
-                width: 150,
-                height: 100,
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    enabled: !_isVoiceInputActive, // Disable during voice input
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText:
-                          _isVoiceInputActive
-                              ? 'Listening...'
-                              : 'Ask me anything...',
-                      hintStyle: TextStyle(color: Colors.blue[100]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
+      body:
+          _isLoadingMessages
+              ? Center(
+                child: Lottie.asset(
+                  'assets/loader2.json',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+              )
+              : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: EdgeInsets.all(16),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final message = _messages[index];
+                        return MessageBubble(
+                          text: message.text,
+                          fromUser: message.fromUser,
+                        );
+                      },
+                    ),
+                  ),
+                  if (_isTyping)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Lottie.asset(
+                        'assets/ai-typing-indicator.json',
+                        width: 150,
+                        height: 100,
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.08),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            enabled:
+                                !_isVoiceInputActive, // Disable during voice input
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText:
+                                  _isVoiceInputActive
+                                      ? 'Listening...'
+                                      : 'Ask me anything...',
+                              hintStyle: TextStyle(color: Colors.blue[100]),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.08),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        VoiceInput(
+                          onResult: _handleVoiceResult,
+                          onListeningStateChanged: (isListening) {
+                            setState(() {
+                              _isVoiceInputActive = isListening;
+                            });
+                          },
+                        ),
+                        ElevatedButton(
+                          onPressed:
+                              (_isSending || _isVoiceInputActive)
+                                  //  || _controller.text.trim().isEmpty)
+                                  ? null
+                                  : () => _sendMessage(_controller.text),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF1976D2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                          ),
+                          child: Text(
+                            'Send',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                SizedBox(width: 8),
-                VoiceInput(
-                  onResult: _handleVoiceResult,
-                  onListeningStateChanged: (isListening) {
-                    setState(() {
-                      _isVoiceInputActive = isListening;
-                    });
-                  },
-                ),
-                ElevatedButton(
-                  onPressed:
-                      (_isSending ||
-                              _isVoiceInputActive)
-                              //  || _controller.text.trim().isEmpty)
-                          ? null
-                          : () => _sendMessage(_controller.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF1976D2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: Text('Send', style: TextStyle(color: Colors.white)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+                ],
+              ),
     );
   }
 }

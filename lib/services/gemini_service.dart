@@ -39,7 +39,7 @@ class GeminiService {
             "parts": [
               {
                 "text":
-                    "write a simple title for this chat in less than 5 words, be generic: $conversation",
+                    "write a simple title for this chat in less than 5 words, single line be generic: $conversation",
               },
             ],
           },

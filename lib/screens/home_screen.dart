@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-                leading: Icon(Icons.code, color: Colors.white),
+              leading: Icon(Icons.code, color: Colors.white),
               title: Text(
                 'About Developer',
                 style: TextStyle(color: Colors.white),
@@ -228,7 +228,14 @@ class _ChatHistoryList extends StatelessWidget {
               .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: Lottie.asset(
+              'assets/loader2.json',
+              width: 120,
+              height: 120,
+              fit: BoxFit.contain,
+            ),
+          );
         }
 
         if (snapshot.hasError) {
