@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class AboutDeveloperPage extends StatelessWidget {
   @override
@@ -33,10 +34,29 @@ class AboutDeveloperPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                    CircleAvatar(
-                    radius: 48,
-                    backgroundImage: AssetImage('assets/raheel1.jpg'),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // CircleAvatar(
+                      // radius: 48,
+                      // backgroundImage: AssetImage('assets/raheel1.jpg'),
+                      // ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Image.asset(
+                          'assets/raheel1.jpg',
+                          height: 130,
+                          width: 130,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Lottie.asset(
+                        'assets/developer.json',
+                        width: 180,
+                        height: 180,
+                      ),
+                    ],
+                  ),
                   // CircleAvatar(
                   //   radius: 48,
                   //   backgroundColor: Color(0xFF1976D2),
@@ -48,7 +68,7 @@ class AboutDeveloperPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0A2342),
+                      color: Color(0xFF1976D2),
                     ),
                   ),
                   SizedBox(height: 8),
@@ -90,6 +110,7 @@ class AboutDeveloperPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  
                 ],
               ),
             ),

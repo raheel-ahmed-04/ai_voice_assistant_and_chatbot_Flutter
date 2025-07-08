@@ -122,9 +122,9 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Lottie.asset(
-                      'assets/ai-animation.json',
-                      width: 250,
-                      height: 250,
+                      'assets/ai-animation2.json',
+                      width: 350,
+                      height: 300,
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -132,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(221, 88, 88, 88),
+                        color: Color(0xFF1976D2),
                       ),
                       textAlign: TextAlign.center,
                     ),

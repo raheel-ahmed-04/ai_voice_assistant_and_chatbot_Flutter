@@ -16,12 +16,14 @@ class SpeechService {
         await _flutterTts.setVolume(1.0);
         await _flutterTts.setPitch(1.0);
         await _flutterTts.setVoice({
-          // 'name': 'th-th-x-thd-network',
-          // 'locale': 'th-TH',
-          // 'name': 'ru-ru-x-rud-local',
-          // 'locale': 'ru-RU',
+          // 'name': 'en-us-x-sfb-local',
+          // 'locale': 'en-US',
+          // 'name': 'en-gb-x-rjs-local',
+          // 'locale': 'en-GB',
           'name': 'it-it-x-itd-local',
           'locale': 'it-IT',
+          // 'name': 'as-in-x-end-local',
+          // 'locale': 'as-IN',
         });
       }
       

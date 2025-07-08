@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/voice_input.dart';
 import '../services/gemini_service.dart';
+import '../services/speech_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? conversationId;
@@ -23,6 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
   User? user;
   String? _conversationId;
   bool _isLoadingMessages = false;
+  bool _isVoiceMessage = false;
 
   @override
   void initState() {
@@ -129,6 +131,12 @@ class _ChatScreenState extends State<ChatScreen> {
         _messages.add(Message(text: aiResponse, fromUser: false));
         _isTyping = false;
       });
+      if (_isVoiceMessage) {
+        await SpeechService.speak(aiResponse);
+        setState(() {
+          _isVoiceMessage = false; // Reset voice message state
+        });
+      }
       await FirebaseFirestore.instance
           .collection('chats')
           .doc(user!.uid)
@@ -197,8 +205,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void _handleVoiceResult(String result) {
     setState(() {
       _controller.text = result;
+      _isVoiceMessage = true; // Mark as voice message
       _isVoiceInputActive = false; // Reset voice input state
     });
+    // Optionally: Automatically send message
+    _sendMessage(result);
   }
 
   @override
