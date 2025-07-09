@@ -101,7 +101,11 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 18),
+                Lottie.asset(
+                  'assets/chatting-animation.json',
+                  width: 250,
+                  height: 250,
+                ),
                 Text(
                   'Welcome to LexiChat',
                   style: TextStyle(
@@ -225,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Colors.white,
                             ),
                             label: Text(
-                              'Login with Google',
+                              'Continue with Google',
                               style: TextStyle(
                                 fontSize: 18,
                                 color: Colors.white,

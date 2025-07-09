@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'services/speech_service.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
+// import 'screens/login_screen.dart';
+// import 'screens/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +20,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: SplashScreen(),
-      routes: {
-        '/login': (_) => LoginScreen(),
-        '/register': (_) => RegisterScreen(),
-      },
+      // routes: {
+      //   '/login': (_) => LoginScreen(),
+      //   '/register': (_) => RegisterScreen(),
+      // },
     );
   }
 }
